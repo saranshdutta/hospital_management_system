@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { LogOut, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import logoImg from '../../assets/logo.jpg';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -15,9 +16,11 @@ export default function Navbar() {
   return (
     <header className="glass-panel sticky top-0 z-50 h-20 flex items-center justify-between px-8 border-b border-indigo-50/50">
       <div className="flex items-center gap-3">
-        <div className="w-11 h-11 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30">
-          P
-        </div>
+        <img 
+          src={logoImg} 
+          alt="PharmaCare Logo" 
+          className="w-12 h-12 object-contain rounded-xl shadow-sm"
+        />
         <span className="text-2xl font-black text-gradient hidden sm:block tracking-tight">PharmaCare</span>
       </div>
       <div className="flex items-center gap-5">
