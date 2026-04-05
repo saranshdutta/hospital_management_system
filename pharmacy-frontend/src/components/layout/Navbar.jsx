@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { LogOut, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import logoImg from '../../assets/logo.jpg';
+import logoImg from '../../assets/medlogo.jpg';
 
 export default function Navbar() {
   const { user, logout } = useAuth();

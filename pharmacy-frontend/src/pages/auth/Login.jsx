@@ -1,24 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import PageTransition from '../../components/layout/PageTransition';
 import toast from 'react-hot-toast';
+import { User, ShieldCheck } from 'lucide-react';
 import bgImage from '../../assets/login-bg.jpg';
-import logoImg from '../../assets/logo.jpg';
+import logoImg from '../../assets/medlogo.jpg';
+
+// Sub-component for the form to isolate state changes and prevent whole-page re-renders
+const LoginForm = memo(({ role, onLogin, loading }) => {
+  const [email, setEmail] = useState(role === 'admin' ? 'admin@pharmacy.com' : 'user@example.com');
+  const [password, setPassword] = useState(role === 'admin' ? 'admin' : 'password');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onLogin(email, password);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <Input
+        label="Email Address"
+        type="email"
+        placeholder={role === 'admin' ? 'admin@pharmacy.com' : 'user@example.com'}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="bg-blue-50/30 border-blue-100/50 focus:bg-white transition-all duration-200"
+      />
+      <Input
+        label="Password"
+        type="password"
+        placeholder="••••••••"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="bg-blue-50/30 border-blue-100/50 focus:bg-white transition-all duration-200"
+      />
+
+      <Button
+        type="submit"
+        className="w-full py-3 text-lg font-bold mt-4 shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-transform"
+        disabled={loading}
+      >
+        {loading ? 'Authenticating...' : `Sign In as ${role.charAt(0).toUpperCase() + role.slice(1)}`}
+      </Button>
+    </form>
+  );
+});
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('user'); // 'user' or 'admin'
   const [loading, setLoading] = useState(false);
-
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-
+  const handleLogin = (email, password) => {
     if (!email || !password) {
       toast.error('Please fill in all fields');
       return;
@@ -28,72 +65,84 @@ export default function Login() {
     // Mock authentication
     setTimeout(() => {
       setLoading(false);
-      if (email === 'admin@pharmacy.com' && password === 'admin') {
-        login({ name: 'System Admin', role: 'admin', email });
-        toast.success('Welcome back, Admin!');
-        navigate('/admin');
-      } else if (email === 'user@example.com' && password === 'password') {
-        login({ name: 'John Doe', role: 'customer', email });
-        toast.success('Logged in successfully!');
-        navigate('/dashboard');
+      if (role === 'admin') {
+        if (email === 'admin@pharmacy.com' && password === 'admin') {
+          login({ name: 'System Admin', role: 'admin', email });
+          toast.success('Welcome back, Admin!');
+          navigate('/admin');
+        } else {
+          toast.error('Invalid Admin credentials');
+        }
       } else {
-        toast.error('Invalid credentials. Try admin@pharmacy.com/admin');
+        // User login
+        if (email === 'user@example.com' && password === 'password') {
+          login({ name: 'John Doe', role: 'customer', email });
+          toast.success('Logged in successfully!');
+          navigate('/dashboard');
+        } else {
+          toast.error('Invalid User credentials');
+        }
       }
-    }, 1000);
+    }, 800);
   };
 
   return (
     <PageTransition>
-      <div className="min-h-screen flex items-center justify-center bg-slate-900 relative">
-        {/* Background Image with Gradient Overlay */}
-        <div
-          className="absolute inset-0 z-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${bgImage})` }}
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 relative overflow-hidden">
+        {/* Background Layer - Optimized to stay static */}
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-[10s] scale-105 hover:scale-100"
+          style={{ backgroundImage: `url(${bgImage})`, filter: 'brightness(0.4)' }}
         />
-        <div className="absolute inset-0 z-0 bg-gradient-to-br from-blue-900/80 to-blue-600/60" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-blue-900/40 via-transparent to-blue-600/30" />
 
-        <div className="relative z-10 w-full max-w-md p-8 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl mx-4 my-8 transition-all duration-500 transform opacity-100 scale-100 translate-y-0">
-          <div className="text-center mb-8">
-            <img 
-              src={logoImg} 
-              alt="PharmaCare Logo" 
-              className="w-20 h-20 object-contain mx-auto mb-4 drop-shadow-md rounded-2xl bg-white p-2"
-            />
-            <h1 className="text-3xl font-bold text-slate-900">Welcome Back</h1>
-            <p className="text-slate-500 mt-2">Sign in to your account</p>
+        <div className="relative z-10 w-full max-w-md mx-4">
+          <div className="bg-white/95 backdrop-blur-md rounded-[2.5rem] shadow-2xl p-8 border border-white/20 transform transition-all duration-300">
+            <div className="text-center mb-8">
+              <div className="inline-block p-4 bg-white rounded-2xl shadow-sm mb-4 border border-blue-50">
+                <img src={logoImg} alt="Logo" className="w-12 h-12 object-contain" />
+              </div>
+              <h1 className="text-3xl font-black text-slate-900 tracking-tight">PharmaCare</h1>
+              <p className="text-slate-500 mt-2 font-medium">Your Health, Our Priority</p>
+            </div>
+
+            {/* Role Toggle Matching Screenshot */}
+            <div className="flex p-1.5 bg-blue-50/50 rounded-2xl mb-8 border border-blue-100/50">
+              <button
+                onClick={() => setRole('user')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold transition-all duration-300 ${
+                  role === 'user' 
+                    ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                <User className={`w-4 h-4 ${role === 'user' ? 'text-red-500' : ''}`} />
+                User
+              </button>
+              <button
+                onClick={() => setRole('admin')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold transition-all duration-300 ${
+                  role === 'admin' 
+                    ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                <ShieldCheck className={`w-4 h-4 ${role === 'admin' ? 'text-blue-600' : ''}`} />
+                Admin
+              </button>
+            </div>
+
+            <LoginForm role={role} onLogin={handleLogin} loading={loading} />
+
+            <div className="mt-8 text-center pt-6 border-t border-slate-100">
+              <p className="text-sm text-slate-600 font-medium">
+                New to PharmaCare?{' '}
+                <Link to="/signup" className="text-blue-600 font-bold hover:text-blue-700 transition-colors">
+                  Create an account
+                </Link>
+              </p>
+            </div>
           </div>
-
-          <form onSubmit={handleLogin} className="space-y-5">
-            <Input
-              label="Email Address"
-              type="email"
-              placeholder="admin@pharmacy.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <Input
-              label="Password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <Button
-              type="submit"
-              className="w-full py-2.5 text-lg font-semibold mt-4"
-              disabled={loading}
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-            </Button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-slate-600">
-            Don't have an account?{' '}
-            <Link to="/signup" className="text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-all">
-              Sign up
-            </Link>
-          </p>
         </div>
       </div>
     </PageTransition>

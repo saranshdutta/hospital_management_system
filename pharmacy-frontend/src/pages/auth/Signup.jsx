@@ -6,7 +6,7 @@ import Button from '../../components/ui/Button';
 import PageTransition from '../../components/layout/PageTransition';
 import toast from 'react-hot-toast';
 import bgImage from '../../assets/login-bg.jpg';
-import logoImg from '../../assets/logo.jpg';
+import logoImg from '../../assets/medlogo.jpg';
 
 export default function Signup() {
   const [formData, setFormData] = useState({
