@@ -1,30 +1,77 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
   body {
     @apply bg-slate-50 text-slate-800 antialiased;
     font-family: 'Inter', sans-serif;
   }
 }
 
-.glass-panel {
-  @apply bg-white/70 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.05)];
+@layer components {
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.05)];
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600;
+  }
+
+  /* Card base used by Card.jsx — ensure rounded corners and bg */
+  .card-base {
+    @apply bg-white rounded-2xl border border-slate-100 shadow-soft;
+  }
 }
 
-.text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600;
-}
+@layer utilities {
+  /* Custom scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 20px;
+  }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 20px;
+  /* Animate-in utilities (used without plugin) */
+  .animate-in {
+    animation-fill-mode: both;
+  }
+  .slide-in-from-bottom-4 {
+    --tw-enter-translate-y: 1rem;
+  }
+  .slide-in-from-bottom-6 {
+    --tw-enter-translate-y: 1.5rem;
+  }
+  .slide-in-from-bottom-8 {
+    --tw-enter-translate-y: 2rem;
+  }
+  .slide-in-from-bottom-12 {
+    --tw-enter-translate-y: 3rem;
+  }
+  .slide-in-from-left-4 {
+    --tw-enter-translate-x: -1rem;
+  }
+  .fade-in {
+    animation: fadeIn 0.4s ease-out both;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(var(--tw-enter-translate-y, 0)) translateX(var(--tw-enter-translate-x, 0)); }
+    to   { opacity: 1; transform: none; }
+  }
+  .fill-mode-both {
+    animation-fill-mode: both;
+  }
+  .duration-500 { animation-duration: 0.5s; }
+  .duration-700 { animation-duration: 0.7s; }
+  .delay-100    { animation-delay: 0.1s; }
+  .delay-200    { animation-delay: 0.2s; }
 }

@@ -1,14 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import AppLayout from '../../components/layout/AppLayout';
 import Card from '../../components/ui/Card';
-import { mockMedicines } from '../../mockData';
-import { Pill, User as UserIcon, Activity, Droplets } from 'lucide-react';
+import { getMedicines } from '../../api/medicines';
+import { Pill, User as UserIcon, Activity, Droplets, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [medicines, setMedicines] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getMedicines()
+      .then(data => setMedicines(data.slice(0, 4)))
+      .catch(err => console.error('Failed to load medicines:', err))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <AppLayout>
@@ -21,7 +30,7 @@ export default function Dashboard() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-        <div 
+        <div
           onClick={() => navigate('/medicines')}
           className="group relative p-6 rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white cursor-pointer hover:-translate-y-1.5 transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(79,70,229,0.5)] hover:shadow-[0_15px_45px_-10px_rgba(79,70,229,0.7)] overflow-hidden"
         >
@@ -36,7 +45,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-        
+
         <Card className="p-6 flex items-center gap-5 cursor-pointer hover:-translate-y-1.5 group hover:border-indigo-200 transition-all duration-300" onClick={() => navigate('/profile')}>
           <div className="p-4 bg-gradient-to-br from-indigo-50 to-blue-50 text-indigo-600 rounded-2xl group-hover:scale-110 transition-transform shadow-sm border border-indigo-100/50"><UserIcon className="w-8 h-8" /></div>
           <div>
@@ -57,23 +66,31 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recommended Medicines */}
         <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-2xl font-semibold text-slate-800 tracking-tight">
-            Recommended For You
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {mockMedicines.slice(0, 4).map(med => (
-              <Card key={med.id} className="p-4 flex gap-5 group hover:border-indigo-200 transition-all cursor-pointer">
-                <div className="w-28 h-28 shrink-0 overflow-hidden rounded-2xl bg-slate-50 shadow-inner border border-slate-100">
-                  <img src={med.image} alt={med.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                </div>
-                <div className="flex flex-col justify-center flex-1 py-1 pr-2">
-                  <h4 className="font-semibold text-slate-800 text-lg group-hover:text-indigo-600 transition-colors">{med.name}</h4>
-                  <p className="text-sm text-slate-500 mt-1 line-clamp-2">{med.desc}</p>
-                  <p className="font-semibold text-slate-800 mt-2 text-lg bg-indigo-50 text-indigo-700 self-start px-2 py-0.5 rounded-md">₹{med.price.toFixed(2)}</p>
-                </div>
-              </Card>
-            ))}
-          </div>
+          <h2 className="text-2xl font-semibold text-slate-800 tracking-tight">Recommended For You</h2>
+          {loading ? (
+            <div className="flex items-center gap-2 text-slate-400 py-8">
+              <Loader2 className="w-5 h-5 animate-spin" /><span>Loading medicines...</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {medicines.map(med => (
+                <Card key={med.id} className="p-4 flex gap-5 group hover:border-indigo-200 transition-all cursor-pointer" onClick={() => navigate('/medicines')}>
+                  <div className="w-28 h-28 shrink-0 overflow-hidden rounded-2xl bg-slate-50 shadow-inner border border-slate-100">
+                    {med.image_url ? (
+                      <img src={med.image_url} alt={med.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl text-slate-200">💊</div>
+                    )}
+                  </div>
+                  <div className="flex flex-col justify-center flex-1 py-1 pr-2">
+                    <h4 className="font-semibold text-slate-800 text-lg group-hover:text-indigo-600 transition-colors">{med.name}</h4>
+                    <p className="text-sm text-slate-500 mt-1 line-clamp-2">{med.description}</p>
+                    <p className="font-semibold mt-2 text-lg bg-indigo-50 text-indigo-700 self-start px-2 py-0.5 rounded-md">₹{med.price.toFixed(2)}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Health Tips */}
@@ -86,7 +103,6 @@ export default function Dashboard() {
               </h4>
               <p className="text-slate-600 text-sm leading-relaxed">Drink at least 8 glasses of water daily to maintain a healthy body and clear skin.</p>
             </div>
-            
             <div className="p-5 bg-white/60 rounded-2xl backdrop-blur-sm border border-white shadow-sm hover:shadow-md transition-all">
               <h4 className="font-semibold text-indigo-900 mb-3 flex items-center gap-3 text-lg">
                 <span className="p-2.5 bg-emerald-100 text-emerald-600 rounded-xl shadow-sm"><Activity className="w-5 h-5" /></span> Move Often
